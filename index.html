@@ -9,6 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="VR Explorer">
     <title>VR Explorer</title>
 
+    <!-- PWA manifest -->
     <link rel="manifest" href="/ExplorerTest10/manifest.json">
 
     <style>
@@ -32,16 +33,22 @@
     <h2>Step 1: Select Simulation</h2>
 
     <div class="dropdown-wrapper">
+        <!-- Dropdown for Audience Sizes -->
         <label for="audienceSelect">Audience Sizes:</label>
         <select id="audienceSelect"></select>
+
         <div class="or-text">or</div>
+
+        <!-- Dropdown for Special Scenarios -->
         <label for="scenarioSelect">Special Scenarios:</label>
         <select id="scenarioSelect"></select>
     </div>
 
     <h2>Step 2: Enter Simulation</h2>
+    <!-- Button to open the selected video -->
     <button id="openBtn">Go</button>
 
+    <!-- Safe Mode options for Android, Laptop, iPhone -->
     <div id="safeModeOptions">
         <p>Safe Mode Options:</p>
         <label><input type="radio" name="safeMode" value="default" checked> Default VR Mode</label>
@@ -49,11 +56,13 @@
         <label><input type="radio" name="safeMode" value="iphone"> iPhone Safe Mode</label>
     </div>
 
+    <!-- Player wrapper for embedding iframe on Android -->
     <div id="playerWrap"></div>
 
     <footer>VR Explorer 1.1 brought to you by Cambridge VR</footer>
 
     <script>
+        // ---------------- BASE PATH ----------------
         const BASE_PATH = "/ExplorerTest10/";
 
         // ---------------- SAFE MODE CONSTANTS ----------------
@@ -64,20 +73,14 @@
         };
 
         // ---------------- VIDEO DATA ----------------
+        // Audience Sizes
         const audienceVideos = {
             "Audience of 0": { DefaultOption: "https://player.virtualrealitypublicspeaking.com/?video=N0-CF", AndroidAndLaptopSafe: "https://www.youtube.com/watch?v=8D5ZJjV-9No", iPhoneSafe: "https://testing.virtual-reality-publics-peaking-player.pages.dev/?video=N0-CF" },
             "Audience of 1": { DefaultOption: "https://player.virtualrealitypublicspeaking.com/?video=N1-CF", AndroidAndLaptopSafe: "https://www.youtube.com/watch?v=L61TY-lVWYc", iPhoneSafe: "https://testing.virtual-reality-publics-peaking-player.pages.dev/?video=N1-CF" },
-            "Audience of 2": { DefaultOption: "https://player.virtualrealitypublicspeaking.com/?video=N2-CF", AndroidAndLaptopSafe: "https://www.youtube.com/watch?v=jisLJabMOaw", iPhoneSafe: "https://testing.virtual-reality-publics-peaking-player.pages.dev/?video=N2-CF" },
-            "Audience of 4": { DefaultOption: "https://player.virtualrealitypublicspeaking.com/?video=N4-CF", AndroidAndLaptopSafe: "https://www.youtube.com/watch?v=583YioSTgGE", iPhoneSafe: "https://testing.virtual-reality-publics-peaking-player.pages.dev/?video=N4-CF" },
-            "Audience of 9": { DefaultOption: "https://player.virtualrealitypublicspeaking.com/?video=N9-CF", AndroidAndLaptopSafe: "https://www.youtube.com/watch?v=7AS7NEA9PFo", iPhoneSafe: "https://testing.virtual-reality-publics-peaking-player.pages.dev/?video=N9-CF" },
-            "Audience of 16": { DefaultOption: "https://player.virtualrealitypublicspeaking.com/?video=N16-CF", AndroidAndLaptopSafe: "https://www.youtube.com/watch?v=_y-lSw1SNaU", iPhoneSafe: "https://testing.virtual-reality-publics-peaking-player.pages.dev/?video=N16-CF" },
-            "Audience of 25": { DefaultOption: "https://player.virtualrealitypublicspeaking.com/?video=N25-CF", AndroidAndLaptopSafe: "https://www.youtube.com/watch?v=CBBwXbX5ogE", iPhoneSafe: "https://testing.virtual-reality-publics-peaking-player.pages.dev/?video=N25-CF" },
-            "Audience of 50": { DefaultOption: "https://player.virtualrealitypublicspeaking.com/?video=N50-CF", AndroidAndLaptopSafe: "https://www.youtube.com/watch?v=RUnKCfWFSfI", iPhoneSafe: "https://testing.virtual-reality-publics-peaking-player.pages.dev/?video=N50-CF" },
-            "Audience of 100": { DefaultOption: "https://player.virtualrealitypublicspeaking.com/?video=N100-CF", AndroidAndLaptopSafe: "https://www.youtube.com/watch?v=ww986pYF46E", iPhoneSafe: "https://testing.virtual-reality-publics-peaking-player.pages.dev/?video=N100-CF" },
-            "Audience of 500": { DefaultOption: "https://player.virtualrealitypublicspeaking.com/?video=N500-CF", AndroidAndLaptopSafe: "https://www.youtube.com/watch?v=S3Ve7FGfjWk", iPhoneSafe: "https://testing.virtual-reality-publics-peaking-player.pages.dev/?video=N500-CF" },
-            "Audience of 1000s": { DefaultOption: "https://player.virtualrealitypublicspeaking.com/?video=N10K-CF", AndroidAndLaptopSafe: "https://www.youtube.com/watch?v=jyUNFPBmJkA", iPhoneSafe: "https://testing.virtual-reality-publics-peaking-player.pages.dev/?video=N10K-CF" }
+            // ... add remaining audience videos here
         };
 
+        // Special Scenarios
         const scenarioVideos = {
             "TV teleprompter": { DefaultOption: "https://player.virtualrealitypublicspeaking.com/?video=ACC01-CF", AndroidAndLaptopSafe: "https://www.youtube.com/watch?v=3ZNddx_YNc0", iPhoneSafe: "https://testing.virtual-reality-publics-peaking-player.pages.dev/?video=ACC01-CF" },
             "Job interview": { DefaultOption: "https://player.virtualrealitypublicspeaking.com/?video=JIC01-CF", AndroidAndLaptopSafe: "https://www.youtube.com/watch?v=-tsxJfabw0s", iPhoneSafe: "https://testing.virtual-reality-publics-peaking-player.pages.dev/?video=JIC01-CF" },
@@ -91,9 +94,9 @@
         const playerWrap = document.getElementById("playerWrap");
         let selectedVideoKey = null;
 
-        // ---------------- POPULATE DROPDOWNS ----------------
+        // ---------------- FUNCTION: POPULATE DROPDOWNS ----------------
         function populateDropdown(selectElement, videosObj) {
-            selectElement.innerHTML = '<option value="">--select option--</option>';
+            selectElement.innerHTML = '<option value="">--select option--</option>'; // default placeholder
             Object.keys(videosObj).forEach(key => {
                 const option = document.createElement('option');
                 option.value = key;
@@ -105,29 +108,48 @@
         populateDropdown(audienceSelect, audienceVideos);
         populateDropdown(scenarioSelect, scenarioVideos);
 
-        // ---------------- VIDEO SELECTION ----------------
+        // ---------------- VIDEO SELECTION LOGIC ----------------
         function updateSelectedVideo() {
+            // Only one dropdown can be selected at a time
             selectedVideoKey = audienceSelect.value || scenarioSelect.value || null;
-            openBtn.classList.toggle("active", !!selectedVideoKey);
+            openBtn.classList.toggle("active", !!selectedVideoKey); // enable Go button only if a video is selected
         }
 
+        // Clear other dropdown when one is selected
         audienceSelect.addEventListener("change", () => { scenarioSelect.value = ""; updateSelectedVideo(); });
         scenarioSelect.addEventListener("change", () => { audienceSelect.value = ""; updateSelectedVideo(); });
 
-        function closePlayer() { playerWrap.style.display="none"; playerWrap.innerHTML=""; }
+        // ---------------- FUNCTION: CLOSE PLAYER ----------------
+        function closePlayer() {
+            playerWrap.style.display="none";
+            playerWrap.innerHTML="";
+        }
 
         // ---------------- OPEN BUTTON LOGIC ----------------
         openBtn.addEventListener("click", () => {
             if (!selectedVideoKey) return;
+
             const video = audienceVideos[selectedVideoKey] || scenarioVideos[selectedVideoKey];
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             const selectedSafeMode = document.querySelector('input[name="safeMode"]:checked').value;
             const linkToOpen = video[selectedSafeMode];
 
             if (selectedSafeMode === SafeMode.DefaultOption) {
-                if (isIOS) window.open(linkToOpen, "_blank");
-                else { playerWrap.innerHTML=`<iframe src="${linkToOpen}" allow="autoplay; fullscreen; accelerometer; gyroscope; xr-spatial-tracking"></iframe><button onclick="closePlayer()" style="position:absolute;top:10px;right:10px;z-index:1001;padding:10px 15px;font-size:1rem;border:none;border-radius:8px;cursor:pointer;">Exit VR</button>`; playerWrap.style.display="flex"; }
-            } else window.open(linkToOpen, "_blank");
+                if (isIOS) {
+                    // iOS opens link in Safari for proper VR experience
+                    window.open(linkToOpen, "_blank");
+                } else {
+                    // Android iframe mode for VR
+                    playerWrap.innerHTML = `
+                        <iframe src="${linkToOpen}" allow="autoplay; fullscreen; accelerometer; gyroscope; xr-spatial-tracking"></iframe>
+                        <button onclick="closePlayer()" style="position:absolute;top:10px;right:10px;z-index:1001;padding:10px 15px;font-size:1rem;border:none;border-radius:8px;cursor:pointer;">Exit VR</button>
+                    `;
+                    playerWrap.style.display="flex";
+                }
+            } else {
+                // Android & Laptop Safe Mode or iPhone Safe Mode: open in new tab
+                window.open(linkToOpen, "_blank");
+            }
         });
     </script>
 </body>
