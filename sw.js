@@ -1,18 +1,20 @@
 // Service Worker for ExplorerTest10 Dynamic PWA
 
-// Name of the cache
+// ---------------- CACHE NAME ----------------
 const CACHE_NAME = 'vr-explorer-cache-v1';
 
-// Files to cache for offline use
+// ---------------- FILES TO CACHE ----------------
+// These are the essential files required to make the PWA work offline
 const urlsToCache = [
-  '/ExplorerTest10/',          // Base path
-  '/ExplorerTest10/index.html', // Main HTML
-  '/ExplorerTest10/manifest.json', // PWA manifest
-  '/ExplorerTest10/icons/icon-192.png', // App icon
-  '/ExplorerTest10/icons/icon-512.png'  // App icon
+  '/ExplorerTest10/',                // Base path
+  '/ExplorerTest10/index.html',      // Main HTML file
+  '/ExplorerTest10/manifest.json',   // PWA manifest
+  '/ExplorerTest10/icons/icon-192.png', // Small icon
+  '/ExplorerTest10/icons/icon-512.png'  // Large icon
 ];
 
-// Install event: cache the listed files
+// ---------------- INSTALL EVENT ----------------
+// Triggered when the service worker is installed
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -20,7 +22,8 @@ self.addEventListener('install', event => {
   );
 });
 
-// Fetch event: respond with cached file if available, otherwise fetch from network
+// ---------------- FETCH EVENT ----------------
+// Intercept network requests and respond with cached files if available
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
@@ -28,16 +31,19 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Activate event: remove old caches if not in whitelist
+// ---------------- ACTIVATE EVENT ----------------
+// Remove old caches if they exist to save space and prevent conflicts
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then(cacheNames => Promise.all(
-      cacheNames.map(cacheName => {
-        if (!cacheWhitelist.includes(cacheName)) {
-          return caches.delete(cacheName); // delete old cache
-        }
-      })
-    ))
+    caches.keys().then(cacheNames =>
+      Promise.all(
+        cacheNames.map(cacheName => {
+          if (!cacheWhitelist.includes(cacheName)) {
+            return caches.delete(cacheName); // Delete old cache
+          }
+        })
+      )
+    )
   );
 });
